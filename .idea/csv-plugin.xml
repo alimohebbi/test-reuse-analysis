@@ -24,6 +24,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/sampled_sm/latest_craft.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/sampled_sm/latest_sampled_all.csv">
           <value>
             <Attribute>

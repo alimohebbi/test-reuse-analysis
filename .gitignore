@@ -1,0 +1,4 @@
+.idea
+correlation_calc/*.csv
+test_case_len/*.csv
+test_case_len/*.pdf
