@@ -1,4 +1,5 @@
 ---
 test_reuse_full: '/Users/usiusi/Documents/Repositories/test-attribute-extractor/data/output/analyse/full'
+test_reuse_plot: '/Users/usiusi/Documents/Repositories/test-attribute-extractor/data/output/analyse/forplot'
 craft_gt: '/Users/usiusi/Documents/Repositories/matching-server/prefrect_matcher/craft_gt/'
 atm_gt: '/Users/usiusi/Documents/Repositories/matching-server/prefrect_matcher/atm_gt/'
