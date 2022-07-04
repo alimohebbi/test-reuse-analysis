@@ -60,23 +60,27 @@ def make_corr_tables(full_agg_results):
 
 def add_legend():
     custom_lines = [
-        Line2D([0], [0], marker="o", color='gold', markersize="7", lw=0),
+        Line2D([0], [0], marker="o", color='limegreen', markersize="8", lw=0),
         Line2D([0], [0], marker="o", color='tab:red', markersize="7", lw=0),
-        Line2D([0], [0], marker="o", color='limegreen', markersize="7", lw=0),
-        Line2D([0], [0], marker="o", color='cornflowerblue', markersize="7", lw=0)
+        Line2D([0], [0], marker="o", color='gold', markersize="6", lw=0),
+        Line2D([0], [0], marker="o", color='cornflowerblue', markersize="5", lw=0)
     ]
-    plt.legend(custom_lines, ['Syntactic Configs', 'Random', 'Perfect', 'Other Configs'], loc=2)
+    plt.legend(custom_lines, ['Perfect', 'Random', 'Syntactic Configs',  'Other Configs'], loc=2)
 
 
 def get_palette(data):
     configs = list(data['config'])
+    data['size'] = 50
     palette = {}
     for i in configs:
         palette[i] = 'cornflowerblue'
         if 'es' in i or 'js' in i:
             palette[i] = 'gold'
+            data.loc[data['config']==i,'size'] = 65
     palette['random_NA_NA_NA'] = 'tab:red'
     palette['perfect_NA_NA_NA'] = 'limegreen'
+    data.loc[data['config']=='random_NA_NA_NA','size'] = 80
+    data.loc[data['config']=='perfect_NA_NA_NA','size'] = 100
     return palette
 
 
@@ -89,7 +93,9 @@ def make_scatter_plot(full_agg_results, axis_x):
         plt.close()
         plt.figure(figsize=(10, 5))
         plt.ylim(0, 1)
-        ax = sns.scatterplot(data=data, x=axis_x, y="F1 score", hue='config', palette=get_palette(data), legend=False, s=50)
+        palette = get_palette(data)
+        ax = sns.scatterplot(data=data, x=axis_x, y="F1 score", hue='config', palette=palette, size='size', sizes=(50,200),
+                             legend=False)
         m, b = np.polyfit(data[axis_x], data["F1 score"], 1)
         plt.plot(data[axis_x], m * data[axis_x] + b, color='orangered')
         add_legend()

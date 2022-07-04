@@ -1,7 +1,7 @@
 .idea
-correlation_calc/*.csv
-correlation_calc/plots/*.pdf
-test_case_len/*.csv
-test_case_len/*.pdf
-impact/plots/*.pdf
-impact/tables/*.csv
+__pycache__/
+
+*.csv
+*.pdf
+!semantic_matching_results/*.csv
+!sampled_sm/converted.csv
