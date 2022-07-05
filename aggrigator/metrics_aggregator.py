@@ -7,7 +7,7 @@ import yaml
 from matplotlib import pyplot as plt
 from matplotlib.lines import Line2D
 
-from util import convert_config_names, make_config_column, reorder_columns, add_file_name_as_config
+from util import convert_config_names, make_config_column, reorder_columns, add_file_name_as_config, rename_subjects
 
 sys.path.append("../..")
 import pandas as pd
@@ -47,6 +47,13 @@ class Analyse:
         self.save_for_plot(results_converted_config)
 
     def read_results(self):
+        results = self.load_results()
+        results.drop('target_app', inplace=True, axis=1)
+        results.drop('src_app', inplace=True, axis=1)
+        results.fillna(0, inplace=True)
+        return results
+
+    def load_results(self):
         desc_map_files = []
         for path in glob.glob(self.get_result_dir() + "/*.csv"):
             csv = read_csv(path, encoding='latin-1')
@@ -54,9 +61,6 @@ class Analyse:
             desc_map_files.append(csv)
         results = pd.concat(desc_map_files, axis=0, ignore_index=True)
         results = self.filter_results(results)
-        results.drop('target_app', inplace=True, axis=1)
-        results.drop('src_app', inplace=True, axis=1)
-        results.fillna(0, inplace=True)
         results.set_index('config', inplace=True)
         return results
 
@@ -76,7 +80,30 @@ class Analyse:
             if self.subjects == 'craftdroid':
                 return results[~results['target_app'].str.contains('a6|a7|a8')]
             elif self.subjects == 'atm':
-                return results[results['target_app'].str.contains('a6|a7|a8')]
+                temp = results[results['target_app'].str.contains('a6|a7|a8')]
+                return self.discard_mig_not_in_atm(temp)
+        return results
+
+    @staticmethod
+    def prepare_for_atm_available_migration(df):
+        df = df.assign(src_app=rename_subjects(df, 'src_app'))
+        df = df.assign(target_app=rename_subjects(df, 'target_app'))
+        df.reset_index(inplace=True)
+        df = df.groupby(by=['config', 'src_app', 'target_app'], as_index=False).agg('mean')
+        return df
+
+    @staticmethod
+    def discard_mig_not_in_atm(temp):
+        analyzer = Analyse('atm', 'atm', OracleStatus.exclude)
+        atm_results = analyzer.load_results()
+        atm_results = Analyse.prepare_for_atm_available_migration(atm_results)
+        temp = Analyse.prepare_for_atm_available_migration(temp)
+        joined_results = pd.merge(temp, atm_results, how="inner", on=['config', 'src_app', 'target_app'],
+                                  suffixes=('_craft', '_atm'))
+        atm_columns = [i for i in joined_results.columns if '_atm' in i]
+        results = joined_results.drop(columns=atm_columns)
+        results = results.drop(columns=['index'])
+        results.columns = [i.replace('_craft', '') for i in results.columns]
         return results
 
     def get_sm_results(self):
@@ -119,6 +146,7 @@ class Analyse:
                      'Training': 'training_set', 'F1 score': 'value'})
         short_columns = ['algorithm', 'descriptors', 'word_embedding', 'training_set', 'value']
         save_path = self.get_save_path('forplot')
+        results = results[~results['algorithm'].isin(['random', 'perfect'])]
         results[short_columns].to_csv(save_path, index=False)
 
     def normalize_top1(self, results_converted_config):
@@ -182,20 +210,20 @@ if __name__ == '__main__':
     # analyzer.run()
     # analyzer = Analyse('craftdroid', 'craftdroid', oracles=False)
     # analyzer.run()
-    # analyzer = Analyse('craftdroid', 'atm', oracles=False)
+    # analyzer = Analyse('craftdroid', 'atm', oracles=OracleStatus.exclude)
     # analyzer.run()
 
-    # analyzer = Analyse('craftdroid', 'all', oracles=OracleStatus.included)
-    # analyzer.run()
+    analyzer = Analyse('craftdroid', 'all', oracles=OracleStatus.included)
+    analyzer.run()
     # analyzer = Analyse('craftdroid', 'craftdroid', oracles=True)
     # analyzer.run()
-    # analyzer = Analyse('craftdroid', 'atm', oracles=True)
+    # analyzer = Analyse('craftdroid', 'atm', oracles=OracleStatus.included)
     # analyzer.run()
     #
-    analyzer = Analyse('atm', 'atm', oracles=OracleStatus.included, oracles_pass=True)
-    analyzer.run()
-    analyzer = Analyse('atm', 'atm', oracles=OracleStatus.included, oracles_pass=False)
-    analyzer.run()
+    # analyzer = Analyse('atm', 'atm', oracles=OracleStatus.included, oracles_pass=True)
+    # analyzer.run()
+    # analyzer = Analyse('atm', 'atm', oracles=OracleStatus.included, oracles_pass=False)
+    # analyzer.run()
     # analyzer = Analyse('atm', 'atm', oracles=False)
     # analyzer.run()
     # analyzer = Analyse('craftdroid', 'craftdroid', oracles=OracleStatus.only, oracles_pass=True)

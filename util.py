@@ -4,8 +4,8 @@ from os import listdir
 import pandas as pd
 
 
-def rename_subjects(x):
-    res = x['mig_name'].replace('ExpenseTracker1', 'a61-b61')
+def rename_subjects(x, column='mig_name'):
+    res = x[column].replace('ExpenseTracker1', 'a61-b61')
     res = res.replace('ExpenseTracker2', 'a62-b61')
     res = res.replace('ExpenseTracker3', 'a63-b61')
     res = res.replace('ExpenseTracker4', 'a64-b61')
@@ -68,8 +68,7 @@ def reorder_columns(df):
 def make_config_column(df):
     data = df.copy()
     data = convert_config_names(data)
-    data['config'] = data['Algorithm'] + '_' + data['Descriptors'] + '_' + data['Embedding'] + '_' + data[
-        'Training']
+    data['config'] = data[['Algorithm', 'Descriptors', 'Embedding', 'Training']].agg('_'.join, axis=1)
     data.drop(columns=['Algorithm', 'Descriptors', 'Embedding', 'Training'], inplace=True)
     return data
 
@@ -79,7 +78,7 @@ def add_mig_name(df):
     if 'task' not in df.columns:
         df['task'] = ''
     df['mig_name'] = ''
-    df['mig_name'] = df.apply(lambda x: mig_name_getter(x), axis =1)
+    df['mig_name'] = df.apply(lambda x: mig_name_getter(x), axis=1)
     return df
 
 
@@ -103,6 +102,7 @@ def add_file_name_as_config(csv, path):
     csv['config'] = file_name
     return csv
 
+
 def concat_config_results(path):
     results_fname = [f for f in listdir(path) if '.csv' in f]
     all_results = []
@@ -113,5 +113,3 @@ def concat_config_results(path):
     all_results_df = pd.concat(all_results)
     all_results_df = all_results_df[['src_app', 'target_app', 'f1_score', 'config']]
     return all_results_df.sort_values(by=['src_app', 'target_app'])
-
-

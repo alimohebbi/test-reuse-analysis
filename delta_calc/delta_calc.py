@@ -8,7 +8,7 @@ from matplotlib.lines import Line2D
 from scipy.stats import ttest_1samp
 from sklearn import preprocessing
 
-from aggrigator.matrix_aggregator import Analyse
+from aggrigator.metrics_aggregator import Analyse
 from util import concat_config_results, make_config_column, add_unified_mig_name
 with open(r'../config.yaml') as file:
     config = yaml.safe_load(file)

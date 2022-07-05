@@ -3,7 +3,42 @@
   <component name="CsvFileAttributes">
     <option name="attributeMap">
       <map>
-        <entry key="/aggrigator/latest_all.csv">
+        <entry key="/aggrigator/forplot/craftdroid_all_oracle_included_forplot.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/aggrigator/forplot/craftdroid_atm_oracle_included_forplot.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/aggrigator/full/craftdroid_atm_oracle_excluded_full.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/aggrigator/short/craftdroid_all_oracle_included_short.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/analysis/tables/impact.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/correlation_calc/corr.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
@@ -25,6 +60,13 @@
           </value>
         </entry>
         <entry key="/sampled_sm/latest_sampled_craftdroid.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/semantic_matching_results/latest_all.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />

@@ -15,7 +15,12 @@ with open(r'../config.yaml') as file:
     config = yaml.safe_load(file)
 
 
-def plot_boxes_std(data, ax):
+def save_plot(data, f, bplot):
+    add_legend(f, 1)
+    f.savefig("plots/" + 'impact' + ".pdf", bbox_inches='tight')
+
+
+def plot_boxes_std(data, ax=None):
     f = plt.figure()
     data = pd.concat([pd.Series(v, name=k) for k, v in data.items()], axis=1)
     data = pd.DataFrame(data)
@@ -36,11 +41,13 @@ def plot_boxes_std(data, ax):
                           marker='o',
                           alpha=0.7,
                           color='black', size=3, ax=ax)
-    bplot.set_xlabel("MRR", fontsize=11, fontweight='bold')
+    bplot.set_xlabel("F1 Score", fontsize=11, fontweight='bold')
     bplot.set_ylabel("SD", fontsize=11, fontweight='bold')
     bplot.tick_params(labelsize=8)
     bplot.set(xticklabels=[])
     bplot.set_xticks([])
+    if not ax:
+        save_plot(data, f, bplot)
 
 
 def get_index_random(data: DataFrame):
@@ -95,7 +102,7 @@ def significance_test(name1, name2, data1, data2):
         print("p > alpha: fail to reject H0, <span style=\"color:red\">same distributions</span> <br /><br />")
 
 
-def analyse(data: DataFrame, ax):
+def analyse(data: DataFrame, ax=None):
     data = remove_unrelated_rows(data)
 
     components_names = list(data.columns)
@@ -136,16 +143,16 @@ def get_palette():
             'algorithm': 'tab:orange', 'descriptors': 'orangered'}
 
 
-def add_legend(fig):
+def add_legend(fig, size=2):
     palette = get_palette()
     custom_lines = [
-        Line2D([0], [0], color=j, markersize="7", lw=8) for j in palette.values()
+        Line2D([0], [0], color=j, markersize=5 * size, lw=5 * size) for j in palette.values()
     ]
     fig.legend(custom_lines, palette.keys(), title='Component type', ncol=4, loc='lower center'
-               , bbox_to_anchor=(0.5, -0.1), fontsize=15, title_fontsize=15)
+               , bbox_to_anchor=(0.5, -0.1), fontsize=8 * size, title_fontsize=8 * size)
 
 
-def main_plot():
+def double_plot():
     data = pd.read_csv(config['test_reuse_plot'] + '/craftdroid_all_oracle_forplot.csv')
 
     fig, axes = plt.subplots(1, 2, figsize=(20, 5), sharey=True)
@@ -155,9 +162,15 @@ def main_plot():
     axes[0].set_title('CraftDroid', fontsize=15, fontweight='bold')
     axes[1].set_title('ATM', fontsize=15, fontweight='bold')
     add_legend(fig)
-    fig.savefig('plots/impact.pdf', bbox_inches='tight')
+    fig.savefig('plots/impact_double.pdf', bbox_inches='tight')
     plt.show()
 
 
+def single_plot(path):
+    data = pd.read_csv(path)
+    analyse(data)
+
+
 if __name__ == "__main__":
-    main_plot()
+    # double_plot()
+    single_plot(config['test_reuse_plot'] + '/craftdroid_atm_oracle_excluded_forplot.csv')
