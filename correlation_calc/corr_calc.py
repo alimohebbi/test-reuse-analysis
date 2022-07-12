@@ -11,39 +11,17 @@ from scipy.stats import pearsonr
 import seaborn as sns
 import ssl
 
+from util import ReadResultCorrelationTable, ReadResultScatterPlot
+
 ssl._create_default_https_context = ssl._create_unverified_context
 with open(r'../config.yaml') as file:
     config = yaml.safe_load(file)
 
 
-def add_baseline_values(csv_df, file_name):
-    random_config_mrr = {'all': 0.20191013, 'atm': 0.2018414, 'craft': 0.196925}
-    random_config_top1 = {'all': 19.5 / 337, 'atm': 20.5 / 116, 'craft': 19 / 221}
-    csv_df.loc[csv_df['Algorithm'] == 'perfect', 'MRR'] = 1
-    csv_df.loc[csv_df['Algorithm'] == 'perfect', 'Top1'] = 1
-    if '_craft' in file_name:
-        csv_df.loc[csv_df['Algorithm'] == 'random', 'MRR'] = random_config_mrr['craft']
-        csv_df.loc[csv_df['Algorithm'] == 'random', 'Top1'] = random_config_top1['craft']
-    elif '_atm' in file_name:
-        csv_df.loc[csv_df['Algorithm'] == 'random', 'MRR'] = random_config_mrr['atm']
-        csv_df.loc[csv_df['Algorithm'] == 'random', 'Top1'] = random_config_top1['atm']
-    else:
-        csv_df.loc[csv_df['Algorithm'] == 'random', 'MRR'] = random_config_mrr['all']
-        csv_df.loc[csv_df['Algorithm'] == 'random', 'Top1'] = random_config_top1['all']
-    return csv_df
 
 
-def read_results(plot=False):
-    full_agg_results = {}
-    for path in glob.glob(config['test_reuse_full'] + "/*.csv"):
-        csv_df = read_csv(path, encoding='latin-1')
-        file_name = os.path.basename(path).split('.')[0]
-        if not plot:
-            csv_df = csv_df[csv_df['MRR'].notna()]
-        else:
-            csv_df = add_baseline_values(csv_df, file_name)
-        full_agg_results[file_name] = csv_df
-    return full_agg_results
+
+
 
 
 def make_corr_tables(full_agg_results):
@@ -60,28 +38,31 @@ def make_corr_tables(full_agg_results):
 
 def add_legend():
     custom_lines = [
-        Line2D([0], [0], marker="o", color='limegreen', markersize="8", lw=0),
-        Line2D([0], [0], marker="o", color='tab:red', markersize="7", lw=0),
-        Line2D([0], [0], marker="o", color='gold', markersize="6", lw=0),
-        Line2D([0], [0], marker="o", color='cornflowerblue', markersize="5", lw=0)
+        Line2D([0], [0], marker="o", color='limegreen', markersize="6", lw=0),
+        Line2D([0], [0], marker="o", color='tab:red', markersize="6", lw=0),
+        Line2D([0], [0], marker="o", color='cornflowerblue', markersize="6", lw=0)
     ]
-    plt.legend(custom_lines, ['Perfect', 'Random', 'Syntactic Configs',  'Other Configs'], loc=2)
+    plt.legend(custom_lines, ['Perfect', 'Random', 'Other Configs'], loc=2)
 
 
 def get_palette(data):
     configs = list(data['config'])
-    data['size'] = 50
     palette = {}
     for i in configs:
         palette[i] = 'cornflowerblue'
-        if 'es' in i or 'js' in i:
-            palette[i] = 'gold'
-            data.loc[data['config']==i,'size'] = 65
     palette['random_NA_NA_NA'] = 'tab:red'
     palette['perfect_NA_NA_NA'] = 'limegreen'
-    data.loc[data['config']=='random_NA_NA_NA','size'] = 80
-    data.loc[data['config']=='perfect_NA_NA_NA','size'] = 100
     return palette
+
+
+def add_annotation(ax, axis_x, data):
+    x_perfect = data.loc[data['Algorithm'] == 'perfect', axis_x].values[0] - 0.03
+    y_perfect = data.loc[data['Algorithm'] == 'perfect', 'F1 score'].values[0] + 0.05
+    ax.annotate('Perfect', (x_perfect, y_perfect))
+
+    x_random = data.loc[data['Algorithm'] == 'random', axis_x].values[0] - 0.03
+    y_random = data.loc[data['Algorithm'] == 'random', 'F1 score'].values[0] + 0.05
+    ax.annotate('Random', (x_random, y_random))
 
 
 def make_scatter_plot(full_agg_results, axis_x):
@@ -94,17 +75,17 @@ def make_scatter_plot(full_agg_results, axis_x):
         plt.figure(figsize=(10, 5))
         plt.ylim(0, 1)
         palette = get_palette(data)
-        ax = sns.scatterplot(data=data, x=axis_x, y="F1 score", hue='config', palette=palette, size='size', sizes=(50,200),
-                             legend=False)
+        ax = sns.scatterplot(data=data, x=axis_x, y="F1 score", hue = 'config', palette=palette)
+        add_annotation(ax, axis_x, data=data)
         m, b = np.polyfit(data[axis_x], data["F1 score"], 1)
         plt.plot(data[axis_x], m * data[axis_x] + b, color='orangered')
         add_legend()
-        plt.savefig(f'plots/{axis_x}_{k}.pdf', bbox_inches='tight')
+        plt.savefig(f'plots/{axis_x}_{k.replace("full","")}.pdf', bbox_inches='tight')
 
 
 if __name__ == '__main__':
-    full_agg_results = read_results(False)
+    full_agg_results = ReadResultCorrelationTable.read_full_results()
     make_corr_tables(full_agg_results)
-    full_agg_results = read_results(True)
+    full_agg_results = ReadResultScatterPlot.read_full_results()
     make_scatter_plot(full_agg_results, "MRR")
     make_scatter_plot(full_agg_results, "Top1")

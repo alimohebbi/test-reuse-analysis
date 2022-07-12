@@ -11,16 +11,18 @@ import matplotlib.patches as mpatches
 from scipy import stats
 from scipy.stats import ttest_ind
 
+from util import ReadResultAnalysis
+
 with open(r'../config.yaml') as file:
     config = yaml.safe_load(file)
 
 
-def save_plot(data, f, bplot):
+def save_plot(f, dir):
     add_legend(f, 1)
-    f.savefig("plots/" + 'impact' + ".pdf", bbox_inches='tight')
+    f.savefig(os.path.join("plots", dir, 'impact.pdf'), bbox_inches='tight')
 
 
-def plot_boxes_std(data, ax=None):
+def plot_boxes_std(data, ax=None, dir=''):
     f = plt.figure()
     data = pd.concat([pd.Series(v, name=k) for k, v in data.items()], axis=1)
     data = pd.DataFrame(data)
@@ -30,7 +32,7 @@ def plot_boxes_std(data, ax=None):
 
     sorted_index = data.median(skipna=True).sort_values().index
     data = data[sorted_index]
-    data.copy().describe().round(4).to_csv('tables/impact.csv')
+    data.copy().describe().round(4).to_csv('tables/' + dir + '/impact.csv')
     palette = get_palette()
     bplot = sns.boxplot(data=data,
                         width=0.3,
@@ -47,7 +49,7 @@ def plot_boxes_std(data, ax=None):
     bplot.set(xticklabels=[])
     bplot.set_xticks([])
     if not ax:
-        save_plot(data, f, bplot)
+        save_plot(f, dir)
 
 
 def get_index_random(data: DataFrame):
@@ -102,7 +104,7 @@ def significance_test(name1, name2, data1, data2):
         print("p > alpha: fail to reject H0, <span style=\"color:red\">same distributions</span> <br /><br />")
 
 
-def analyse(data: DataFrame, ax=None):
+def analyse(data: DataFrame, ax=None, dir=''):
     data = remove_unrelated_rows(data)
 
     components_names = list(data.columns)
@@ -116,7 +118,7 @@ def analyse(data: DataFrame, ax=None):
         res_fix_others.update({col: list(values.values)})
         normality_test("std" + col, res_fix_others.get(col))
 
-    plot_boxes_std(res_fix_others, ax=ax)
+    plot_boxes_std(res_fix_others, ax=ax, dir=dir)
     sinigicant_test(components_names, res_fix_others)
 
 
@@ -153,12 +155,12 @@ def add_legend(fig, size=2):
 
 
 def double_plot():
-    data = pd.read_csv(config['test_reuse_plot'] + '/craftdroid_all_oracle_forplot.csv')
+    data = pd.read_csv(config['test_reuse_plot'] + '/craftdroid_all_oracle_included_forplot.csv')
 
     fig, axes = plt.subplots(1, 2, figsize=(20, 5), sharey=True)
-    analyse(data, axes[0])
-    data = pd.read_csv(config['test_reuse_plot'] + '/atm_atm_oracle_passfree_forplot.csv')
-    analyse(data, axes[1])
+    analyse(data, ax=axes[0])
+    data = pd.read_csv(config['test_reuse_plot'] + '/atm_atm_oracle_included_passfree_forplot.csv')
+    analyse(data, ax=axes[1])
     axes[0].set_title('CraftDroid', fontsize=15, fontweight='bold')
     axes[1].set_title('ATM', fontsize=15, fontweight='bold')
     add_legend(fig)
@@ -166,11 +168,16 @@ def double_plot():
     plt.show()
 
 
-def single_plot(path):
-    data = pd.read_csv(path)
-    analyse(data)
+def single_plot(data, dir):
+    if not os.path.exists(os.path.join('tables', dir)):
+        os.mkdir(os.path.join('tables', dir))
+    if not os.path.exists(os.path.join('plots', dir)):
+        os.mkdir(os.path.join('plots', dir))
+    analyse(data, dir=dir)
 
 
 if __name__ == "__main__":
     # double_plot()
-    single_plot(config['test_reuse_plot'] + '/craftdroid_atm_oracle_excluded_forplot.csv')
+    full_agg_results = ReadResultAnalysis().read_full_results()
+    for dir, df in full_agg_results.items():
+        single_plot(df, dir)

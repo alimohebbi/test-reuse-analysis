@@ -1,7 +1,14 @@
+import glob
 import os
+from abc import ABC, abstractmethod
 from os import listdir
 
 import pandas as pd
+import yaml
+from pandas import read_csv
+
+with open(r'../config.yaml') as file:
+    config = yaml.safe_load(file)
 
 
 def rename_subjects(x, column='mig_name'):
@@ -113,3 +120,59 @@ def concat_config_results(path):
     all_results_df = pd.concat(all_results)
     all_results_df = all_results_df[['src_app', 'target_app', 'f1_score', 'config']]
     return all_results_df.sort_values(by=['src_app', 'target_app'])
+
+
+class ResultReader(ABC):
+    path_pattern = config['test_reuse_full'] + "/*.csv"
+
+    @classmethod
+    def read_full_results(cls):
+        full_agg_results = {}
+        for path in glob.glob(cls.path_pattern):
+            csv_df = read_csv(path, encoding='latin-1')
+            file_name = os.path.basename(path).split('.')[0]
+            csv_df = cls.process_data(csv_df, file_name)
+            full_agg_results[file_name] = csv_df
+        return full_agg_results
+
+    @staticmethod
+    @abstractmethod
+    def process_data(csv_df, file_name):
+        pass
+
+
+class ReadResultScatterPlot(ResultReader):
+    @staticmethod
+    def process_data(csv_df, file_name):
+        return ReadResultScatterPlot.add_baseline_values(csv_df, file_name)
+
+    @staticmethod
+    def add_baseline_values(csv_df, file_name):
+        random_config_mrr = {'all': 0.20191013, 'atm': 0.2018414, 'craft': 0.196925}
+        random_config_top1 = {'all': 19.5 / 337, 'atm': 20.5 / 116, 'craft': 19 / 221}
+        csv_df.loc[csv_df['Algorithm'] == 'perfect', 'MRR'] = 1
+        csv_df.loc[csv_df['Algorithm'] == 'perfect', 'Top1'] = 1
+        if '_craft' in file_name:
+            csv_df.loc[csv_df['Algorithm'] == 'random', 'MRR'] = random_config_mrr['craft']
+            csv_df.loc[csv_df['Algorithm'] == 'random', 'Top1'] = random_config_top1['craft']
+        elif '_atm' in file_name:
+            csv_df.loc[csv_df['Algorithm'] == 'random', 'MRR'] = random_config_mrr['atm']
+            csv_df.loc[csv_df['Algorithm'] == 'random', 'Top1'] = random_config_top1['atm']
+        else:
+            csv_df.loc[csv_df['Algorithm'] == 'random', 'MRR'] = random_config_mrr['all']
+            csv_df.loc[csv_df['Algorithm'] == 'random', 'Top1'] = random_config_top1['all']
+        return csv_df
+
+
+class ReadResultCorrelationTable(ResultReader):
+    @staticmethod
+    def process_data(csv_df, file_name):
+        return csv_df[csv_df['MRR'].notna()]
+
+
+class ReadResultAnalysis(ResultReader):
+    path_pattern = config['test_reuse_plot'] + "/*.csv"
+
+    @staticmethod
+    def process_data(csv_df, file_name):
+        return csv_df

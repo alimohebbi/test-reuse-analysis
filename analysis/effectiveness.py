@@ -1,3 +1,4 @@
+import glob
 import os
 import warnings
 
@@ -6,15 +7,16 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 import yaml
-from pandas import DataFrame
+from pandas import DataFrame, read_csv
 
 from analysis.impact_analysis import significance_test
+from util import ReadResultAnalysis
 
 with open(r'../config.yaml') as file:
     config = yaml.safe_load(file)
 
 
-def write_effectiveness(data, component_to_els):
+def write_effectiveness(data, component_to_els, dir):
     for i in component_to_els.keys():
         if i == 'training_set':
             component_to_els[i].remove('standard')
@@ -22,10 +24,10 @@ def write_effectiveness(data, component_to_els):
         temp = data[component_to_els[i]].copy()
         sorted_index = temp.median(skipna=True).sort_values().index
         temp = temp[sorted_index]
-        temp.describe().round(4).to_csv(f'tables/{i}_eff.csv')
+        temp.describe().round(4).to_csv(f'tables/{dir}/{i}_eff.csv')
 
 
-def analyse(data: DataFrame):
+def analyse(data: DataFrame, dir):
     value_column = data["value"]
     print(value_column.describe())
     print("the BEST configuration is " + os.linesep + str(data.loc[value_column.idxmax()]))
@@ -85,16 +87,16 @@ def analyse(data: DataFrame):
 
         # plot_boxes(res_fix_comp_single, 'value distribution for component' + str(col), str(col), 'evaluation metric',
         #           str(col) + "-value-distribution", {})
-    plot_boxes(res_fix_comp_all, "MRR distribution for the components", "components", 'MRR'
-               , "all-value-distribution", component_to_elements)
+    plot_boxes(res_fix_comp_all, 'MRR'
+               , component_to_elements, dir)
 
 
-def plot_boxes(data: DataFrame, title: str, x_axis_label: str, y_axis_label: str, file_name: str,
-               component_to_els: dict):
+def plot_boxes(data: DataFrame, y_axis_label: str,
+               component_to_els: dict, dir):
     f = plt.figure()
     data = pd.concat([pd.Series(v, name=k) for k, v in data.items()], axis=1)
     data = pd.DataFrame(data)
-    write_effectiveness(data, component_to_els)
+    write_effectiveness(data, component_to_els, dir)
     cols = list(data.columns.values)
     print(cols)
 
@@ -143,11 +145,16 @@ def plot_boxes(data: DataFrame, title: str, x_axis_label: str, y_axis_label: str
                 i = i + 1
             handles.append(mpatches.Patch(color=colors[j], label='Label1'))
             j = j + 1
-    f.savefig("plots/" + file_name + ".pdf", bbox_inches='tight')
+    f.savefig(os.path.join("plots", dir, 'all_value_distribution.pdf'), bbox_inches='tight')
     plt.close('all')
 
 
 if __name__ == '__main__':
-    path = config['test_reuse_plot'] + '/craftdroid_atm_oracle_excluded_forplot.csv'
-    data = pd.read_csv(path)
-    analyse(data)
+
+    full_agg_results = ReadResultAnalysis().read_full_results()
+    for dir, df in full_agg_results.items():
+        if not os.path.exists(os.path.join('tables', dir)):
+            os.mkdir(os.path.join('tables', dir))
+        if not os.path.exists(os.path.join('plots', dir)):
+            os.mkdir(os.path.join('plots', dir))
+        analyse(df, dir)
