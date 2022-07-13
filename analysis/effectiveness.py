@@ -153,6 +153,7 @@ if __name__ == '__main__':
 
     full_agg_results = ReadResultAnalysis().read_full_results()
     for dir, df in full_agg_results.items():
+        dir = dir.replace('_forplot','')
         if not os.path.exists(os.path.join('tables', dir)):
             os.mkdir(os.path.join('tables', dir))
         if not os.path.exists(os.path.join('plots', dir)):

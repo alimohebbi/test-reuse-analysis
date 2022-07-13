@@ -177,7 +177,8 @@ def single_plot(data, dir):
 
 
 if __name__ == "__main__":
-    # double_plot()
-    full_agg_results = ReadResultAnalysis().read_full_results()
-    for dir, df in full_agg_results.items():
-        single_plot(df, dir)
+    double_plot()
+    # full_agg_results = ReadResultAnalysis().read_full_results()
+    # for dir, df in full_agg_results.items():
+    #     dir = dir.replace('_forplot','')
+    #     single_plot(df, dir)

@@ -207,35 +207,35 @@ class Analyse:
 
 if __name__ == '__main__':
     ### Oracle excluded
-    analyzer = Analyse('craftdroid', 'all', oracles=OracleStatus.exclude)
-    analyzer.run()
-    analyzer = Analyse('craftdroid', 'craftdroid', oracles=OracleStatus.exclude)
-    analyzer.run()
-    analyzer = Analyse('craftdroid', 'atm', oracles=OracleStatus.exclude)
-    analyzer.run()
+    # analyzer = Analyse('craftdroid', 'all', oracles=OracleStatus.exclude)
+    # analyzer.run()
+    # analyzer = Analyse('craftdroid', 'craftdroid', oracles=OracleStatus.exclude)
+    # analyzer.run()
+    # analyzer = Analyse('craftdroid', 'atm', oracles=OracleStatus.exclude)
+    # analyzer.run()
 
     analyzer = Analyse('atm', 'atm', oracles=OracleStatus.exclude)
     analyzer.run()
 
 
     ### Oracle included
-    analyzer = Analyse('craftdroid', 'all', oracles=OracleStatus.included)
-    analyzer.run()
-    analyzer = Analyse('craftdroid', 'craftdroid', oracles=OracleStatus.included)
-    analyzer.run()
-    analyzer = Analyse('craftdroid', 'atm', oracles=OracleStatus.included)
-    analyzer.run()
-
-    analyzer = Analyse('atm', 'atm', oracles=OracleStatus.included, oracles_pass=False)
-    analyzer.run()
-
-    ### Oracle only
-    analyzer = Analyse('craftdroid', 'all', oracles=OracleStatus.only)
-    analyzer.run()
-    analyzer = Analyse('craftdroid', 'craftdroid', oracles=OracleStatus.only)
-    analyzer.run()
-    analyzer = Analyse('craftdroid', 'atm', oracles=OracleStatus.only)
-    analyzer.run()
-
-    analyzer = Analyse('atm', 'atm', oracles=OracleStatus.only, oracles_pass=False)
-    analyzer.run()
+    # analyzer = Analyse('craftdroid', 'all', oracles=OracleStatus.included)
+    # analyzer.run()
+    # analyzer = Analyse('craftdroid', 'craftdroid', oracles=OracleStatus.included)
+    # analyzer.run()
+    # analyzer = Analyse('craftdroid', 'atm', oracles=OracleStatus.included)
+    # analyzer.run()
+    #
+    # analyzer = Analyse('atm', 'atm', oracles=OracleStatus.included, oracles_pass=False)
+    # analyzer.run()
+    #
+    # ### Oracle only
+    # analyzer = Analyse('craftdroid', 'all', oracles=OracleStatus.only)
+    # analyzer.run()
+    # analyzer = Analyse('craftdroid', 'craftdroid', oracles=OracleStatus.only)
+    # analyzer.run()
+    # analyzer = Analyse('craftdroid', 'atm', oracles=OracleStatus.only)
+    # analyzer.run()
+    #
+    # analyzer = Analyse('atm', 'atm', oracles=OracleStatus.only, oracles_pass=False)
+    # analyzer.run()

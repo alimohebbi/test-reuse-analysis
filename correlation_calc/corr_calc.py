@@ -80,7 +80,7 @@ def make_scatter_plot(full_agg_results, axis_x):
         m, b = np.polyfit(data[axis_x], data["F1 score"], 1)
         plt.plot(data[axis_x], m * data[axis_x] + b, color='orangered')
         add_legend()
-        plt.savefig(f'plots/{axis_x}_{k.replace("full","")}.pdf', bbox_inches='tight')
+        plt.savefig(f'plots/{axis_x}_{k.replace("_full","")}.pdf', bbox_inches='tight')
 
 
 if __name__ == '__main__':
