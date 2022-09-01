@@ -52,6 +52,23 @@ def convert_config_names(df):
     return df
 
 
+def make_df_plot_friendly(df):
+    if 'MRR' not in df.columns:
+        return df
+    df = df.drop(columns=['top2', 'top3', 'top4', 'top5', 'time', 'zeros'])
+    df = df[['training_set', 'word_embedding', 'descriptors', 'algorithm', 'MRR', 'top1']]
+    df = df.replace(['custom'], 'semfinder_a')
+    df = df.replace(['edit_distance'], 'es')
+    df = df.replace(['jaccard'], 'js')
+    df = df.replace(['adaptdroid'], 'adaptdroid_a')
+    df = df.replace(['android'], 'manuals')
+    df['algorithm'] = df['algorithm'].replace(['craftdroid'], 'craftdroid_a')
+    df['descriptors'] = df['descriptors'].replace(['craftdroid'], 'craftdroid_d')
+    df['algorithm'] = df['algorithm'].replace(['atm'], 'atm_a')
+    df['descriptors'] = df['descriptors'].replace(['atm'], 'atm_d')
+    return df
+
+
 def reorder_columns(df):
     df.drop('config', inplace=True, axis=1)
     first_column = df.pop('Algorithm')

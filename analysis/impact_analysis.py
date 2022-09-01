@@ -1,17 +1,14 @@
 import os
-import sys
 import warnings
+
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 import yaml
 from matplotlib.lines import Line2D
 from pandas import DataFrame, Series
-import matplotlib.patches as mpatches
 from scipy import stats
 from scipy.stats import ttest_ind
-
-from util import ReadResultAnalysis
 
 with open(r'../config.yaml') as file:
     config = yaml.safe_load(file)
@@ -20,6 +17,9 @@ with open(r'../config.yaml') as file:
 def save_plot(f, dir):
     add_legend(f, 1)
     f.savefig(os.path.join("plots", dir, 'impact.pdf'), bbox_inches='tight')
+
+
+x_label = 'F1 Score'
 
 
 def plot_boxes_std(data, ax=None, dir=''):
@@ -35,7 +35,7 @@ def plot_boxes_std(data, ax=None, dir=''):
     data.copy().describe().round(4).to_csv('tables/' + dir + '/impact.csv')
     palette = get_palette()
     bplot = sns.boxplot(data=data,
-                        width=0.3,
+                        width=0.6,
                         palette=palette, ax=ax)
 
     bplot = sns.stripplot(data=data,
@@ -43,8 +43,8 @@ def plot_boxes_std(data, ax=None, dir=''):
                           marker='o',
                           alpha=0.7,
                           color='black', size=3, ax=ax)
-    bplot.set_xlabel("F1 Score", fontsize=11, fontweight='bold')
-    bplot.set_ylabel("SD", fontsize=11, fontweight='bold')
+    bplot.set_xlabel(xlabel=x_label, fontsize=18, fontweight='bold')
+    bplot.set_ylabel("SD", fontsize=18, fontweight='bold')
     bplot.tick_params(labelsize=8)
     bplot.set(xticklabels=[])
     bplot.set_xticks([])
@@ -157,13 +157,13 @@ def add_legend(fig, size=2):
 def double_plot():
     data = pd.read_csv(config['test_reuse_plot'] + '/craftdroid_all_oracle_included_forplot.csv')
 
-    fig, axes = plt.subplots(1, 2, figsize=(20, 5), sharey=True)
+    fig, axes = plt.subplots(1, 2, figsize=(12, 5), sharey=True)
     analyse(data, ax=axes[0])
     data = pd.read_csv(config['test_reuse_plot'] + '/atm_atm_oracle_included_passfree_forplot.csv')
     analyse(data, ax=axes[1])
     axes[0].set_title('CraftDroid', fontsize=15, fontweight='bold')
     axes[1].set_title('ATM', fontsize=15, fontweight='bold')
-    add_legend(fig)
+    add_legend(fig, 1.5)
     fig.savefig('plots/impact_double.pdf', bbox_inches='tight')
     plt.show()
 
