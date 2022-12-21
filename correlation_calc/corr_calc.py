@@ -18,12 +18,6 @@ with open(r'../config.yaml') as file:
     config = yaml.safe_load(file)
 
 
-
-
-
-
-
-
 def make_corr_tables(full_agg_results):
     corr_list = []
     for k, v in full_agg_results.items():
@@ -75,12 +69,15 @@ def make_scatter_plot(full_agg_results, axis_x):
         plt.figure(figsize=(10, 5))
         plt.ylim(0, 1)
         palette = get_palette(data)
-        ax = sns.scatterplot(data=data, x=axis_x, y="F1 score", hue = 'config', palette=palette)
+        ax = sns.scatterplot(data=data, x=axis_x, y="F1 score", hue='config', palette=palette)
         add_annotation(ax, axis_x, data=data)
         m, b = np.polyfit(data[axis_x], data["F1 score"], 1)
         plt.plot(data[axis_x], m * data[axis_x] + b, color='orangered')
+        ax.set_xlabel(axis_x,fontsize=15)
+        ax.set_ylabel("F1 score",fontsize=15)
+        ax.set_xlim(0.0, 1.05)
         add_legend()
-        plt.savefig(f'plots/{axis_x}_{k.replace("_full","")}.pdf', bbox_inches='tight')
+        plt.savefig(f'plots/{axis_x}_{k.replace("_full", "")}.pdf', bbox_inches='tight')
 
 
 if __name__ == '__main__':

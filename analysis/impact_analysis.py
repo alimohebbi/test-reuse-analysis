@@ -104,9 +104,16 @@ def significance_test(name1, name2, data1, data2):
         print("p > alpha: fail to reject H0, <span style=\"color:red\">same distributions</span> <br /><br />")
 
 
+def rename_components(data):
+    return data.rename(columns={"word_embedding": "Word Embedding", "algorithm": "Semantic Matching Algorithm",
+                         "training_set": "Corpus of Documents", "descriptors": "Event Descriptor Extractor"
+                         })
+
+
+
 def analyse(data: DataFrame, ax=None, dir=''):
     data = remove_unrelated_rows(data)
-
+    data = rename_components(data)
     components_names = list(data.columns)
     components_names.remove("value")
 
@@ -141,8 +148,8 @@ def sinigicant_test(components_names, res_fix_others):
 
 
 def get_palette():
-    return {'training_set': 'tab:blue', 'word_embedding': 'tab:green',
-            'algorithm': 'tab:orange', 'descriptors': 'orangered'}
+    return {'Corpus of Documents': 'tab:blue', 'Word Embedding': 'tab:green',
+            'Semantic Matching Algorithm': 'tab:orange', 'Event Descriptor Extractor': 'orangered'}
 
 
 def add_legend(fig, size=2):

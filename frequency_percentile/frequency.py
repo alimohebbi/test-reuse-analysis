@@ -3,7 +3,7 @@ from math import floor
 import pandas
 import pandas as pd
 import yaml
-from pandas import read_csv
+from pandas import read_csv, DataFrame
 
 from util import make_df_plot_friendly
 
@@ -11,9 +11,10 @@ with open(r'../config.yaml') as file:
     config = yaml.safe_load(file)
 
 
-def load_results() -> pandas.DataFrame:
+def load_results(plot_friendly=True) -> pandas.DataFrame:
     result = read_csv(config['semantic_matching_results'] + 'latest_all.csv')
-    result = make_df_plot_friendly(result)
+    if plot_friendly:
+        result = make_df_plot_friendly(result)
     return result
 
 
@@ -35,11 +36,27 @@ def get_frequencies(results, metric):
     return pd.DataFrame(d)
 
 
+def count_zeros(df: DataFrame):
+    df = df.query('word_embedding == "w2v"')
+    result = df.groupby(by=['training_set']).sum()
+    print(result['zeros'])
+
+
+def avg_time_algorithms(df: DataFrame):
+    result = df.groupby(by=['algorithm']).mean()
+    print(result['time'])
+
+
 if __name__ == '__main__':
-    results = load_results()
-    df = get_frequencies(results, 'MRR')
-    df.to_csv('frequency_mrr.csv', index=False)
-    print(df)
-    df = get_frequencies(results, 'top1')
-    df.to_csv('frequency_top1.csv', index=False)
-    print(df)
+    results = load_results(plot_friendly=False)
+    count_zeros(results)
+    avg_time_algorithms(results)
+    # results = load_results(True)
+    # print(results['MRR'].describe())
+    # print((results['top1']/337).describe())
+    # df = get_frequencies(results, 'MRR')
+    # df.to_csv('frequency_mrr.csv', index=False)
+    # print(df)
+    # df = get_frequencies(results, 'top1')
+    # df.to_csv('frequency_top1.csv', index=False)
+    # print(df)
