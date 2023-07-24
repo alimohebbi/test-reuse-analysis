@@ -28,6 +28,24 @@ def rename_subjects(x, column='mig_name'):
     return res
 
 
+def rename_subjects_readable(x, column='mig_name'):
+    subject_name = pd.read_csv('../test_case_len/subjects-names.csv')
+    res = x[column].str.replace('a61-b61', subject_name.query('id == "ExpenseTracker1"')['name'].values[0])
+    res = res.str.replace('a62-b61', subject_name.query('id == "ExpenseTracker2"')['name'].values[0])
+    res = res.str.replace('a63-b61', subject_name.query('id == "ExpenseTracker3"')['name'].values[0])
+    res = res.str.replace('a64-b61', subject_name.query('id == "ExpenseTracker4"')['name'].values[0])
+
+    res = res.str.replace('a72-b71', subject_name.query('id == "NoteTaking2"')['name'].values[0])
+    res = res.str.replace('a73-b71', subject_name.query('id == "NoteTaking3"')['name'].values[0])
+    res = res.str.replace('a74-b71', subject_name.query('id == "NoteTaking4"')['name'].values[0])
+
+    res = res.str.replace('a81-b81', subject_name.query('id == "ShoppingList1"')['name'].values[0])
+    res = res.str.replace('a82-b81', subject_name.query('id == "ShoppingList2"')['name'].values[0])
+    res = res.str.replace('a83-b81', subject_name.query('id == "ShoppingList3"')['name'].values[0])
+    res = res.str.replace('a84-b81', subject_name.query('id == "ShoppingList4"')['name'].values[0])
+    return res
+
+
 def convert_config_names(df):
     if 'config' not in df.columns:
         df.reset_index(inplace=True)
@@ -113,6 +131,11 @@ def mig_name_getter(x):
 def add_unified_mig_name(df):
     df = add_mig_name(df)
     df['mig_name'] = df.apply(rename_subjects, axis=1)
+    return df
+
+
+def make_mig_name_readable(df):
+    df = df.assign(mig_name=rename_subjects_readable(df, 'mig_name'))
     return df
 
 

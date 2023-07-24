@@ -8,10 +8,12 @@ from matplotlib.lines import Line2D
 from scipy.stats import ttest_1samp
 from sklearn import preprocessing
 
-from aggrigator.metrics_aggregator import Analyse
+from aggrigator.metrics_aggregator import Analyse, OracleStatus
 from util import concat_config_results, make_config_column, add_unified_mig_name
+
 with open(r'../config.yaml') as file:
     config = yaml.safe_load(file)
+
 
 def agg_atm_random_configs(atm_atm_df):
     result = atm_atm_df.groupby(by=['config', 'mig_name'], as_index=False).agg("mean")
@@ -37,21 +39,22 @@ def config_normalization(df):
     return df
 
 
-def prepare_df_for_config_frange(df):
-    df = normalize_delta(df.copy().fillna(0))
+def prepare_df_for_config_frange(df, normalize=True):
+    if normalize:
+        df = normalize_delta(df.copy().fillna(0))
     df = make_config_column(df.fillna(0))
     df = add_unified_mig_name(df)
     df.drop(columns=['src_app', 'target_app', 'task'], inplace=True)
     return df
 
 
-def config_delta_per_mig(atm_atm_df: pd.DataFrame, craft_atm_df: pd.DataFrame):
-    atm_atm_df = prepare_df_for_config_frange(atm_atm_df)
-    craft_atm_df = prepare_df_for_config_frange(craft_atm_df)
+def get_processed_joined_df(atm_atm_df: pd.DataFrame, craft_atm_df: pd.DataFrame, normalize=True):
+    atm_atm_df = prepare_df_for_config_frange(atm_atm_df, normalize=normalize)
+    craft_atm_df = prepare_df_for_config_frange(craft_atm_df, normalize=normalize)
     atm_atm_df = agg_atm_random_configs(atm_atm_df)
     joined_dfs = pd.merge(atm_atm_df, craft_atm_df, how='inner', on=["config", "mig_name"], suffixes=("_atm", "_craft"))
     joined_dfs['delta'] = joined_dfs['F1 score_atm'] - joined_dfs['F1 score_craft']
-    creat_delta_box_plots(joined_dfs)
+    return joined_dfs
 
 
 def get_palette(data):
@@ -98,4 +101,5 @@ if __name__ == '__main__':
     path = config['evaluator_results'] + 'craftdroid/oracles_included/'
     all_results_df = concat_config_results(path)
     craft_atm_df = all_results_df[all_results_df['src_app'].str.contains('a6|a7|a8')]
-    config_delta_per_mig(atm_df, craft_atm_df)
+    joined_dfs = get_processed_joined_df(atm_df, craft_atm_df)
+    creat_delta_box_plots(joined_dfs)
