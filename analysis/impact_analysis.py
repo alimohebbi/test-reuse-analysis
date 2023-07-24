@@ -10,6 +10,8 @@ from pandas import DataFrame, Series
 from scipy import stats
 from scipy.stats import ttest_ind
 
+from util import make_df_plot_friendly
+
 with open(r'../config.yaml') as file:
     config = yaml.safe_load(file)
 
@@ -106,9 +108,8 @@ def significance_test(name1, name2, data1, data2):
 
 def rename_components(data):
     return data.rename(columns={"word_embedding": "Word Embedding", "algorithm": "Semantic Matching Algorithm",
-                         "training_set": "Corpus of Documents", "descriptors": "Event Descriptor Extractor"
-                         })
-
+                                "training_set": "Corpus of Documents", "descriptors": "Event Descriptor Extractor"
+                                })
 
 
 def analyse(data: DataFrame, ax=None, dir=''):
@@ -149,7 +150,7 @@ def sinigicant_test(components_names, res_fix_others):
 
 def get_palette():
     return {'Corpus of Documents': 'tab:blue', 'Word Embedding': 'tab:green',
-            'Semantic Matching Algorithm': 'tab:orange', 'Event Descriptor Extractor': 'orangered'}
+            'Semantic Matching Algorithm': 'gold', 'Event Descriptor Extractor': 'orangered'}
 
 
 def add_legend(fig, size=2):
@@ -157,7 +158,7 @@ def add_legend(fig, size=2):
     custom_lines = [
         Line2D([0], [0], color=j, markersize=5 * size, lw=5 * size) for j in palette.values()
     ]
-    fig.legend(custom_lines, palette.keys(), title='Component type', ncol=4, loc='lower center'
+    fig.legend(custom_lines, palette.keys(), title='Component Type', ncol=4, loc='lower center'
                , bbox_to_anchor=(0.5, -0.1), fontsize=8 * size, title_fontsize=8 * size)
 
 
@@ -171,9 +172,29 @@ def double_plot():
     axes[0].set_title('CraftDroid', fontsize=15, fontweight='bold')
     axes[1].set_title('ATM', fontsize=15, fontweight='bold')
     add_legend(fig, 1.5)
-    fig.savefig('plots/impact_double.pdf', bbox_inches='tight')
+    fig.savefig('plots/impact_reuse.pdf', bbox_inches='tight')
     plt.show()
 
+
+def double_isolation_plot():
+    data = pd.read_csv(config['semantic_matching_results'] + '/latest_all.csv')
+    data = make_df_plot_friendly(data)
+    data.drop(columns=['top1'], inplace=True)
+    data.rename(columns={'MRR': 'value'}, inplace=True)
+    global x_label
+    x_label = 'MRR'
+    fig, axes = plt.subplots(1, 2, figsize=(12, 5), sharey=True)
+    analyse(data, ax=axes[0])
+    data = pd.read_csv(config['semantic_matching_results'] + '/latest_all.csv')
+    data = make_df_plot_friendly(data)
+    data.drop(columns=['MRR'], inplace=True)
+    data.rename(columns={'top1': 'value'}, inplace=True)
+    data['value'] = data['value'] / 337
+    x_label = 'Top1'
+    analyse(data, ax=axes[1])
+    add_legend(fig, 1.5)
+    fig.savefig('plots/impact_isolation.pdf', bbox_inches='tight')
+    plt.show()
 
 def single_plot(data, dir):
     if not os.path.exists(os.path.join('tables', dir)):
@@ -185,6 +206,7 @@ def single_plot(data, dir):
 
 if __name__ == "__main__":
     double_plot()
+    double_isolation_plot()
     # full_agg_results = ReadResultAnalysis().read_full_results()
     # for dir, df in full_agg_results.items():
     #     dir = dir.replace('_forplot','')
