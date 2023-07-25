@@ -3,6 +3,7 @@ import os
 from abc import ABC, abstractmethod
 from os import listdir
 
+import numpy as np
 import pandas as pd
 import yaml
 from pandas import read_csv
@@ -134,8 +135,18 @@ def add_unified_mig_name(df):
     return df
 
 
+def add_category(df):
+    df['category'] = ""
+    df['category'].where(~df['mig_name'].str.contains('a6'), 'Expense', inplace=True)
+    df['category'].where(~df['mig_name'].str.contains('a7'), 'Note', inplace=True)
+    df['category'].where(~df['mig_name'].str.contains('a8'), 'Shopping', inplace=True)
+    return df
+
+
 def make_mig_name_readable(df):
+    df = add_category(df)
     df = df.assign(mig_name=rename_subjects_readable(df, 'mig_name'))
+    df = df.assign(mig_name=df['mig_name'] + '(' + df['category'] + ')')
     return df
 
 
