@@ -1,7 +1,0 @@
----
-test_reuse_full: '/Users/usiusi/Documents/Repositories/ese-analysis/aggrigator/full'
-test_reuse_plot: '/Users/usiusi/Documents/Repositories/ese-analysis/aggrigator/forplot'
-craft_gt: '/Users/usiusi/Documents/Repositories/matching-server/prefrect_matcher/craft_gt/'
-atm_gt: '/Users/usiusi/Documents/Repositories/matching-server/prefrect_matcher/atm_gt/'
-evaluator_results: '/Users/usiusi/Documents/Repositories/test-attribute-extractor/data/output/evaluation/'
-semantic_matching_results: '/Users/usiusi/Documents/Repositories/ese-analysis/semantic_matching_results/'

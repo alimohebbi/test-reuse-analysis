@@ -32,21 +32,25 @@ def make_corr_tables(full_agg_results):
 
 def add_legend():
     custom_lines = [
-        Line2D([0], [0], marker="o", color='limegreen', markersize="6", lw=0),
-        Line2D([0], [0], marker="o", color='tab:red', markersize="6", lw=0),
+        Line2D([0], [0], marker="s", color='limegreen', markersize="6", lw=0),
+        Line2D([0], [0], marker="v", color='tab:red', markersize="6", lw=0),
         Line2D([0], [0], marker="o", color='cornflowerblue', markersize="6", lw=0)
     ]
     plt.legend(custom_lines, ['Perfect', 'Random', 'Other Configs'], loc=2)
 
 
-def get_palette(data):
+def get_style(data):
     configs = list(data['config'])
     palette = {}
+    marker = {}
     for i in configs:
         palette[i] = 'cornflowerblue'
+        marker[i] = 'o'
     palette['random_NA_NA_NA'] = 'tab:red'
     palette['perfect_NA_NA_NA'] = 'limegreen'
-    return palette
+    marker['random_NA_NA_NA'] = 'v'
+    marker['perfect_NA_NA_NA'] = 's'
+    return palette, marker
 
 
 def add_annotation(ax, axis_x, data):
@@ -68,13 +72,14 @@ def make_scatter_plot(full_agg_results, axis_x):
         plt.close()
         plt.figure(figsize=(10, 5))
         plt.ylim(0, 1)
-        palette = get_palette(data)
-        ax = sns.scatterplot(data=data, x=axis_x, y="F1 score", hue='config', palette=palette)
+        palette, marker_style = get_style(data)
+        ax = sns.scatterplot(data=data, x=axis_x, y="F1 score", hue='config', palette=palette, style='config',
+                             markers=marker_style, s =70)
         add_annotation(ax, axis_x, data=data)
         m, b = np.polyfit(data[axis_x], data["F1 score"], 1)
         plt.plot(data[axis_x], m * data[axis_x] + b, color='orangered')
-        ax.set_xlabel(axis_x,fontsize=15)
-        ax.set_ylabel("F1 score",fontsize=15)
+        ax.set_xlabel(axis_x, fontsize=15)
+        ax.set_ylabel("F1 score", fontsize=15)
         ax.set_xlim(0.0, 1.05)
         add_legend()
         plt.savefig(f'plots/{axis_x}_{k.replace("_full", "")}.pdf', bbox_inches='tight')

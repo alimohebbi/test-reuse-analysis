@@ -5,3 +5,4 @@ __pycache__/
 *.pdf
 !semantic_matching_results/*.csv
 !sampled_sm/converted.csv
+config.yaml

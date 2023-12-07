@@ -2,6 +2,7 @@ import os
 import warnings
 
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpl
 import pandas as pd
 import seaborn as sns
 import yaml
@@ -40,11 +41,19 @@ def plot_boxes_std(data, ax=None, dir=''):
                         width=0.6,
                         palette=palette, ax=ax)
 
+
+    patterns = ['//', '+', 'xx', '|']
+
+    for i, patch in enumerate(ax.artists):
+        patch.set_hatch(patterns[i])
+
+
     bplot = sns.stripplot(data=data,
                           jitter=True,
                           marker='o',
                           alpha=0.7,
                           color='black', size=3, ax=ax)
+
     bplot.set_xlabel(xlabel=x_label, fontsize=18, fontweight='bold')
     bplot.set_ylabel("SD", fontsize=18, fontweight='bold')
     bplot.tick_params(labelsize=8)

@@ -1,0 +1,7 @@
+---
+test_reuse_full: 'aggrigator/full'
+test_reuse_plot: 'aggrigator/forplot'
+craft_gt: 'path to ground truth of ATM generator'
+atm_gt: 'path to ground truth of CraftDroid generator'
+evaluator_results: 'path to result of test migrations'
+semantic_matching_results: 'path to results of semantic matching'

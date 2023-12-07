@@ -44,6 +44,8 @@ def rename_subjects_readable(x, column='mig_name'):
     res = res.str.replace('a82-b81', subject_name.query('id == "ShoppingList2"')['name'].values[0])
     res = res.str.replace('a83-b81', subject_name.query('id == "ShoppingList3"')['name'].values[0])
     res = res.str.replace('a84-b81', subject_name.query('id == "ShoppingList4"')['name'].values[0])
+    res = res.str.replace('\s-\s$', ' ', regex=True)
+    res = res.str.replace('\s-\s', ' ➜ ', regex=True)
     return res
 
 

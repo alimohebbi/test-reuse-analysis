@@ -3,6 +3,7 @@ import sys
 import pandas as pd
 import seaborn as sn
 from matplotlib import pyplot as plt
+from matplotlib.lines import Line2D
 
 sys.path.append("../delta_calc")
 from aggrigator.metrics_aggregator import Analyse, OracleStatus
@@ -31,6 +32,7 @@ class ScenarioBoxPlotMaker(ComparisonPlotMaker):
         ax = sn.boxplot(data=melt_result, y='F1 Score', x='Scenario', hue='Test Generator', order=order, showmeans=True,
                         meanprops=meanpointprops)
         ax.set_xticklabels(ax.get_xticklabels(), rotation=90)
+        ScenarioBoxPlotMaker.add_legend()
         save_path = 'plot/box_plot_score_sort.pdf' if self.sort_type == 'score' else 'plot/box_plot_category_sort.pdf'
         plt.savefig(save_path, bbox_inches='tight')
 
@@ -53,6 +55,16 @@ class ScenarioBoxPlotMaker(ComparisonPlotMaker):
     def set_sort_type(self, sort_type):
         self.sort_type = sort_type
 
+    @staticmethod
+    def add_legend():
+        custom_lines = [
+            Line2D([0], [0], color='tab:blue', lw=4),
+            Line2D([0], [0], color='tab:orange', lw=4),
+            Line2D([0], [0], marker="^", markeredgecolor="green", markerfacecolor='red', markersize="7",
+                   lw=0)
+        ]
+        plt.legend(custom_lines, ['ATM Generator', 'CrafDroid Generator', 'Mean'])
+
 
 """
     A confidence interval indicates where the population parameter is likely to reside.
@@ -71,7 +83,7 @@ class ScenarioLinePlotMaker(ScenarioBoxPlotMaker):
         plt.clf()
         plt.close()
         plt.figure(figsize=(20, 5))
-        ax = sn.lineplot(data=melt_result, y='F1 Score', x='Scenario', hue='Test Generator')
+        ax = sn.lineplot(data=melt_result, y='F1 Score', x='Scenario', hue='Test Generator', markers=True)
         plt.draw()
         ax.set_xticklabels(ax.get_xticklabels(), rotation=90)
         save_path = 'plot/line_plot_score_sort.pdf' if self.sort_type == 'score' else 'plot/line_plot_category_sort.pdf'
@@ -105,15 +117,15 @@ def read_result():
 
 if __name__ == '__main__':
     atm_result, craft_results = read_result()
-    maker = ScenarioBoxPlotMaker(atm_result, craft_results)
-    maker.set_sort_type('category')
-    maker.create_plot()
-    maker.set_sort_type('score')
-    maker.create_plot()
-    maker = ScenarioLinePlotMaker(atm_result, craft_results)
-    maker.set_sort_type('category')
-    maker.create_plot()
-    maker.set_sort_type('score')
-    maker.create_plot()
+    # maker = ScenarioBoxPlotMaker(atm_result, craft_results)
+    # maker.set_sort_type('category')
+    # maker.create_plot()
+    # maker.set_sort_type('score')
+    # maker.create_plot()
+    # maker = ScenarioLinePlotMaker(atm_result, craft_results)
+    # maker.set_sort_type('category')
+    # maker.create_plot()
+    # maker.set_sort_type('score')
+    # maker.create_plot()
     maker = ScenarioDeltaMaker(atm_result, craft_results)
     maker.create_plot()
